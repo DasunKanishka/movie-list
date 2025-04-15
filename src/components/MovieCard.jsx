@@ -3,7 +3,7 @@ import React from 'react';
 const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const MovieCard = ({ movie:
-    { title, poster_path, vote_average, release_date, original_language }
+    { title, poster_path, vote_average, release_date, original_language, adult }
 }) => {
     return (
         <li className="movie-card">
@@ -25,6 +25,8 @@ const MovieCard = ({ movie:
                 <span>&#8226;</span>
 
                 <p className="year">{ release_date ? release_date.split('-')[0] : 'N/A' }</p>
+
+                { adult && <img src="./adults-only-sign.png" alt="Adults Only" className="adults-only block w-20" /> }
             </div>
         </li>
     );
