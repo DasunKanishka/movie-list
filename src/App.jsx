@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import {useDebounce} from 'react-use';
+import { useDebounce } from 'react-use';
 import './App.css';
+import { updateSearchCount } from './appwrite.js';
 
 import Header from './components/Header';
 import Search from './components/Search';
@@ -35,7 +36,7 @@ const App = () => {
 
         try {
             const endpoint = query
-                ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
+                ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&include_adult=true`
                 : `${API_BASE_URL}/discover/movie?include_adult=true&language=en-US&sort_by=popularity.desc`;
             const response = await fetch(endpoint, API_OPTIONS);
 
@@ -51,6 +52,10 @@ const App = () => {
             }
 
             setMovieList(data.results);
+
+            if (query && data.results.length > 0) {
+                await updateSearchCount(query, data.results[0]);
+            }
         } catch (error) {
             console.error(error);
 
@@ -76,15 +81,11 @@ const App = () => {
                 <div className="all-movies">
                     <h2>All Movies</h2>
 
-                    {isLoading ? (
-                        <Loader />
-                    ) : errorMessage ? (
-                        <ErrorMessage errorMessage={errorMessage} />
-                    ) : (
-                        <ul>
-                            {movieList.map(movie => <MovieCard key={movie.id} movie={movie} />)}
-                        </ul>
-                    )}
+                    {
+                        isLoading ? <Loader />
+                        : errorMessage ? <ErrorMessage errorMessage={errorMessage} />
+                        : <ul>{ movieList.map(movie => <MovieCard key={movie.id} movie={movie} />) }</ul>
+                    }
                 </div>
             </div>
         </main>
