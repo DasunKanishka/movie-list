@@ -6,7 +6,7 @@ const MovieCard = ({ movie:
     { title, poster_path, vote_average, release_date, original_language, adult }
 }) => {
     return (
-        <li className="movie-card">
+        <>
             <img src={ poster_path ? `${POSTER_BASE_URL}/${poster_path}` : './no-movie.png' } alt={ title } />
 
             <h3 className="my-4">{ title }</h3>
@@ -28,7 +28,7 @@ const MovieCard = ({ movie:
 
                 { adult && <img src="./adults-only-sign.png" alt="Adults Only" className="adults-only block w-20" /> }
             </div>
-        </li>
+        </>
     );
 }
 

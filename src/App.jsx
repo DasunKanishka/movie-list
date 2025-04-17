@@ -6,8 +6,9 @@ import { updateSearchCount, getTrendingMovies } from './appwrite.js';
 import Header from './components/Header';
 import Search from './components/Search';
 import Loader from './components/Loader';
-import ErrorMessage from './components/ErrorMessage.jsx';
-import MovieCard from './components/MovieCard.jsx';
+import ErrorMessage from './components/ErrorMessage';
+import MovieCard from './components/MovieCard';
+import TrendingMovieCard from './components/TrendingMovieCard';
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -58,7 +59,7 @@ const App = () => {
                 await updateSearchCount(query, data.results[0]);
             }
         } catch (error) {
-            console.error(error);
+            console.error(`Error occurred while fetching movies: ${ error }`);
 
             setErrorMessage('Error occurred while fetching movies. Please try again later');
         } finally {
@@ -72,7 +73,9 @@ const App = () => {
 
             setTrendingMovies(movies.documents);
         } catch (error) {
-            console.error(`Error fetching trending movies: ${error}`);
+            console.error(`Error fetching trending movies: ${ error }`);
+
+            setErrorMessage('Error occurred while fetching trending movies. Please try again later');
         }
     }
 
@@ -91,31 +94,35 @@ const App = () => {
             <div className="wrapper">
                 <Header />
 
-                <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+                <Search searchTerm={ searchTerm } setSearchTerm={ setSearchTerm } />
 
-                <section className="trending">
+                { isLoading && <Loader /> }
+
+                { errorMessage && <ErrorMessage errorMessage={ errorMessage } /> }
+
+                { trendingMovies.length > 0 && <section className="trending">
                     <h2>Trending Movies</h2>
 
                     <ul>
-                        { trendingMovies.map((movie, index) => (
+                        { trendingMovies.map((movie, index) =>
                             <li key={ movie.$id }>
-                                <p>{ index + 1 }</p>
-
-                                <img src={ movie.poster_url } alt={ movie.title } />
+                                <TrendingMovieCard movie={ movie } index={ index } />
                             </li>
-                        )) }
+                        ) }
                     </ul>
-                </section>
+                </section> }
 
-                <section className="all-movies">
+                { movieList.length > 0 && <section className="all-movies">
                     <h2>All Movies</h2>
 
-                    {
-                        isLoading ? <Loader />
-                        : errorMessage ? <ErrorMessage errorMessage={errorMessage} />
-                        : <ul>{ movieList.map(movie => <MovieCard key={movie.id} movie={movie} />) }</ul>
-                    }
-                </section>
+                    <ul>
+                        { movieList.map(movie =>
+                            <li key={ movie.id } className="movie-card">
+                                <MovieCard movie={ movie } />
+                            </li>
+                        )}
+                    </ul>
+                </section> }
             </div>
         </main>
     );
