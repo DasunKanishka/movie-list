@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDebounce } from 'react-use';
 import './App.css';
-import { updateSearchCount } from './appwrite.js';
+import { updateSearchCount, getTrendingMovies } from './appwrite.js';
 
 import Header from './components/Header';
 import Search from './components/Search';
@@ -24,6 +24,7 @@ const App = () => {
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [movieList, setMovieList] = useState([]);
+    const [trendingMovies, setTrendingMovies] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     // Debounce the search term to prevent making too many API requests
@@ -65,9 +66,23 @@ const App = () => {
         }
     }
 
+    const loadTrendingMovies = async () => {
+        try {
+            const movies = await getTrendingMovies();
+
+            setTrendingMovies(movies.documents);
+        } catch (error) {
+            console.error(`Error fetching trending movies: ${error}`);
+        }
+    }
+
     useEffect(() => {
         fetchMovies(debouncedSearchTerm);
     }, [debouncedSearchTerm]);
+
+    useEffect(() => {
+        loadTrendingMovies()
+    }, []);
 
     return (
         <main>
@@ -78,7 +93,21 @@ const App = () => {
 
                 <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-                <div className="all-movies">
+                <section className="trending">
+                    <h2>Trending Movies</h2>
+
+                    <ul>
+                        { trendingMovies.map((movie, index) => (
+                            <li key={ movie.$id }>
+                                <p>{ index + 1 }</p>
+
+                                <img src={ movie.poster_url } alt={ movie.title } />
+                            </li>
+                        )) }
+                    </ul>
+                </section>
+
+                <section className="all-movies">
                     <h2>All Movies</h2>
 
                     {
@@ -86,7 +115,7 @@ const App = () => {
                         : errorMessage ? <ErrorMessage errorMessage={errorMessage} />
                         : <ul>{ movieList.map(movie => <MovieCard key={movie.id} movie={movie} />) }</ul>
                     }
-                </div>
+                </section>
             </div>
         </main>
     );
