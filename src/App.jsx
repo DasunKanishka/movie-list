@@ -21,25 +21,26 @@ const API_OPTIONS = {
 };
 
 const App = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
     const [movieList, setMovieList] = useState([]);
     const [trendingMovies, setTrendingMovies] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     // Debounce the search term to prevent making too many API requests
     // Default 400ms
     useDebounce(() => setDebouncedSearchTerm(searchTerm), 400, [searchTerm]);
 
-    const fetchMovies = async (query = '') => {
+    const fetchMovies = async (query = '', page = 1) => {
         setIsLoading(true);
         setErrorMessage('');
 
         try {
+            const endpointParams = `${page}&&include_adult=true&include_video=true&language=en-US&&sort_by=popularity.desc`;
             const endpoint = query
-                ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&include_adult=true`
-                : `${API_BASE_URL}/discover/movie?include_adult=true&language=en-US&sort_by=popularity.desc`;
+                ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&${endpointParams}`
+                : `${API_BASE_URL}/discover/movie?${endpointParams}`;
             const response = await fetch(endpoint, API_OPTIONS);
 
             if (!response.ok) { throw new Error('Failed to fetch movies'); }
